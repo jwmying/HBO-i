@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: .docker/dockerfile
+        image: 'laravel'
+        container_name: hbo-i-laravel-app
+        ports:
+            - "80:80"
+        volumes:
+            - laravel-data:/var/www/html/public/storage
+        networks:
+            - laravel-hbo-i
+        depends_on:
+            - mysql
+        command: [ "./.docker/entry-command.sh" ]
+    mysql:
+        image: 'mariadb:latest'
+        container_name: hbo-i-laravel-db
+        restart: unless-stopped
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - mysql-data:/var/lib/mysql
+        networks:
+            - laravel-hbo-i
+
+networks:
+    laravel-hbo-i:
+        driver: bridge
+
+volumes:
+  mysql-data:
+  laravel-data:
